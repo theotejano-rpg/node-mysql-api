@@ -13,7 +13,21 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 
-app.use(cors({ origin: (origin, callback) => callback(null, true), credentials: true }));
+const allowedOrigins = [
+    'http://localhost:4200',
+    process.env.FRONTEND_URL || ''
+].filter(Boolean);
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
 
 
 app.use('/accounts', accountsController);
