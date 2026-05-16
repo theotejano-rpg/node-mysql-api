@@ -5,39 +5,39 @@ import cors from 'cors';
 import errorHandler from './_middleware/error-handler';
 import accountsController from './accounts/accounts.controller';
 import swaggerDocs from './_helpers/swagger';
+import { initialize } from './_helpers/db';
 
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(cors({ origin: (origin, callback) => callback(null, true), credentials: true }));
 
+// DB middleware
+let initPromise: Promise<void> | null = null;
+async function ensureDbInitialized() {
+    if (!initPromise) {
+        initPromise = initialize();
+    }
+    return initPromise;
+}
 
-const allowedOrigins = [
-    'http://localhost:4200',
-    process.env.FRONTEND_URL || ''
-].filter(Boolean);
+const dbMiddleware = async (req: any, res: any, next: any) => {
+    try {
+        await ensureDbInitialized();
+        next();
+    } catch (err: any) {
+        const errorMessage = err.message || err;
+        console.error('Database initialization error:', errorMessage);
+        res.status(500).json({ message: `Database initialization failed: ${errorMessage}` });
+    }
+};
 
-app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true
-}));
-
-
+app.use(dbMiddleware);
 app.use('/accounts', accountsController);
-
-
 app.use('/api-docs', swaggerDocs);
-
-
 app.use(errorHandler);
 
-
-const port = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 4000;
+const port = process.env.PORT || 4000;
 app.listen(port, () => console.log('Server listening on port ' + port));
