@@ -226,11 +226,12 @@ function _delete(req: any, res: any, next: any) {
 }
 
 // Helper functions
-
 function setTokenCookie(res: any, token: any) {
-  const cookieOptions = {
-    httpOnly: true,
-    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-  };
-  res.cookie('refreshToken', token, cookieOptions);
+    const cookieOptions: any = {
+        httpOnly: true,
+        expires: new Date(Date.now() + 7*24*60*60*1000),
+        sameSite: process.env.COOKIE_SAMESITE || 'none',
+        secure: process.env.COOKIE_SECURE === 'true' || true
+    };
+    res.cookie('refreshToken', token, cookieOptions);
 }
