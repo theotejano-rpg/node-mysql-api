@@ -3,7 +3,7 @@ info:
   title: Node MySQL API
   version: 1.0.0
 servers:
-  - url: http://localhost:4000
+  - url: https://node-mysql-api-1-8fgj.onrender.com
 paths:
   /accounts/authenticate:
     post:
@@ -132,4 +132,125 @@ paths:
                   type: string
       responses:
         '200':
+          description: OK  /accounts:
+    get:
+      summary: Get all accounts (Admin only)
+      operationId: getAll
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
           description: OK
+        '401':
+          description: Unauthorized
+    post:
+      summary: Create a new account (Admin only)
+      operationId: create
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                confirmPassword:
+                  type: string
+                role:
+                  type: string
+                  enum: [Admin, User]
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+  /accounts/{id}:
+    get:
+      summary: Get account by ID
+      operationId: getById
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+    put:
+      summary: Update account by ID
+      operationId: update
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                confirmPassword:
+                  type: string
+                role:
+                  type: string
+                  enum: [Admin, User]
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+    delete:
+      summary: Delete account by ID
+      operationId: deleteAccount
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Account deleted successfully
+        '401':
+          description: Unauthorized
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
